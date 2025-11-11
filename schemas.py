@@ -1,48 +1,43 @@
 """
-Database Schemas
+Database Schemas for CitySense
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model maps to a MongoDB collection (lowercased class name).
+Use these across the backend for validation and persistence.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+class Idea(BaseModel):
+    title: str = Field(..., description="Short headline for the idea")
+    description: str = Field(..., description="Details of the proposal")
+    category: str = Field(..., description="e.g., mobility, energy, waste, air")
+    location: Optional[str] = Field(None, description="Location description or coordinates")
+    tags: Optional[List[str]] = Field(default_factory=list)
+    votes: int = Field(0, ge=0, description="Upvote counter")
 
-class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+class IssueReport(BaseModel):
+    title: str = Field(...)
+    category: str = Field(..., description="traffic | pollution | infrastructure | other")
+    location: Optional[str] = None
+    photo_url: Optional[str] = None
+    details: Optional[str] = None
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+class SimulationScenario(BaseModel):
+    name: str
+    electric_vehicles_pct: float = Field(..., ge=0, le=100)
+    green_parks: int = Field(..., ge=0)
+    smart_waste_pct: float = Field(..., ge=0, le=100)
+    solar_adoption_pct: float = Field(..., ge=0, le=100)
+    carbon_reduction_kg: float
+    energy_savings_kwh: float
+    livability_score: float = Field(..., ge=0, le=100)
 
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Dataset(BaseModel):
+    name: str
+    description: str
+    category: str
+    last_updated: str
+    download_csv: str
+    download_json: str
+    api_endpoint: str
